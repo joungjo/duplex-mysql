@@ -34,19 +34,24 @@ import com.google.code.or.common.glossary.column.StringColumn;
  *
  */
 public class BinlogParseRecord {
-	private static final int MAX_FILE_NAME_LENGTH = 271;
-	private static MappedByteBuffer tableMapBuffer;
-	private static MappedByteBuffer positionBuffer;
-	static {
+	private final int MAX_FILE_NAME_LENGTH = 271;
+	private MappedByteBuffer tableMapBuffer;
+	private MappedByteBuffer positionBuffer;
+
+	private BinlogParseRecord() {
+		init();
+	}
+
+	private void init() {
 		try {
 			tableMapBuffer = FileChannel.open(
-					Paths.get(System.getProperty("user.dir"), "record", "tablemap.rec"), 
+					Paths.get("record", "tablemap.rec"),
 					StandardOpenOption.CREATE, 
 					StandardOpenOption.WRITE, 
 					StandardOpenOption.READ).
 					map(MapMode.READ_WRITE, 0, MAX_FILE_NAME_LENGTH);
 			positionBuffer = FileChannel.open(
-					Paths.get(System.getProperty("user.dir"), "record", "position.rec"), 
+					Paths.get("record", "position.rec"), 
 					StandardOpenOption.CREATE, 
 					StandardOpenOption.WRITE, 
 					StandardOpenOption.READ).
@@ -54,9 +59,9 @@ public class BinlogParseRecord {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
-	
+
+	public final static BinlogParseRecord single = new BinlogParseRecord();
 	
 	/**
 	 * get byte arrary starting from index
@@ -68,16 +73,16 @@ public class BinlogParseRecord {
 	 * defined and larger than the new position then it is 
 	 * discarded. 
 	 */
-	public static void positionRead(byte[] bs, int index) {
+	public void positionRead(byte[] bs, int index) {
 		positionBuffer.position(index);
 		positionBuffer.get(bs);
 	}
 	
-	public static byte positionReadByte() {
+	public byte positionReadByte() {
 		return positionBuffer.get();
 	}
 	
-	public static byte positionReadByte(int index) {
+	public byte positionReadByte(int index) {
 		return positionBuffer.get(index);
 	}
 	
@@ -88,7 +93,7 @@ public class BinlogParseRecord {
 	 * @param index The index from which the bytes will be read
 	 * @return The int value at the given index
 	 */
-	public static int positionReadInt(int index) {
+	public int positionReadInt(int index) {
 		return positionBuffer.getInt(index);
 	}
 	
@@ -100,19 +105,19 @@ public class BinlogParseRecord {
 	 * and then increments the position by four. </p>
 	 * @return
 	 */
-	public static int positionReadInt() {
+	public int positionReadInt() {
 		return positionBuffer.getInt();
 	}
 	
-	public static long positionReadLong() {
+	public long positionReadLong() {
 		return positionBuffer.getLong();
 	}
 	
-	public static long positionReadLong(int index) {
+	public long positionReadLong(int index) {
 		return positionBuffer.getLong(index);
 	}
 	
-	public static void writeHeader(BinlogEventV4Header header, AtomicBoolean sign, AtomicBoolean skip) {
+	public void writeHeader(BinlogEventV4Header header, AtomicBoolean sign, AtomicBoolean skip) {
 		long nextPosition = header.getNextPosition();
 		long position = header.getPosition();
 		String fileName = header.getBinlogFileName();
@@ -131,7 +136,7 @@ public class BinlogParseRecord {
 		}
 	}
 	
-	public static void writeHeader(BinlogEventV4Header header, AtomicBoolean sign) {
+	public void writeHeader(BinlogEventV4Header header, AtomicBoolean sign) {
 		long nextPosition = header.getNextPosition();
 		long position = header.getPosition();
 		String fileName = header.getBinlogFileName();
@@ -150,7 +155,7 @@ public class BinlogParseRecord {
 		}
 	}
 	
-	public static void tableMapWrite(TableMapEvent event) {
+	public void tableMapWrite(TableMapEvent event) {
 		if (event == null) {
 			return;
 		}
@@ -175,7 +180,7 @@ public class BinlogParseRecord {
 		tableMapBuffer.put(columnTypes);
 	}
 
-	public static TableMapEvent readTableMapEvent() {
+	public TableMapEvent readTableMapEvent() {
 		tableMapBuffer.position(0);
 		byte b = tableMapBuffer.get();
 		if (b != -1) {

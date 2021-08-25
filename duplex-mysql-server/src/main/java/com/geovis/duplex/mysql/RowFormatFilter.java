@@ -26,9 +26,9 @@ public class RowFormatFilter implements BinlogEventListener {
 	private final AtomicBoolean sign = new AtomicBoolean(true);
 
 	{
-		byte flag = BinlogParseRecord.positionReadByte();
+		byte flag = BinlogParseRecord.single.positionReadByte();
 		if (flag == -1) {
-			sign.set(BinlogParseRecord.positionReadByte(1) == -1);
+			sign.set(BinlogParseRecord.single.positionReadByte(1) == -1);
 		}
 	}
 
@@ -73,12 +73,12 @@ public class RowFormatFilter implements BinlogEventListener {
 			break;
 		case XidEvent.EVENT_TYPE:
 			if (sign.compareAndSet(false, true)) {
-				BinlogParseRecord.writeHeader(header, sign);
+				BinlogParseRecord.single.writeHeader(header, sign);
 				return;
 			}
 			break;
 		case  TableMapEvent.EVENT_TYPE:
-			BinlogParseRecord.tableMapWrite(((TableMapEvent)event).copy());
+			BinlogParseRecord.single.tableMapWrite(((TableMapEvent) event).copy());
 			break;
 		case FormatDescriptionEvent.EVENT_TYPE:
 			return;
@@ -88,7 +88,7 @@ public class RowFormatFilter implements BinlogEventListener {
 			headerImpl.setBinlogFileName(rotateEvent.getBinlogFileName().toString());
 			headerImpl.setNextPosition(rotateEvent.getBinlogPosition());
 			headerImpl.setEventLength(0);
-			BinlogParseRecord.writeHeader(headerImpl, sign);
+			BinlogParseRecord.single.writeHeader(headerImpl, sign);
 			return;
 		default:
 			break;
@@ -96,9 +96,10 @@ public class RowFormatFilter implements BinlogEventListener {
 
 		if (sign.get()) { 
 			event.callback(context);
+			context.doSomething(event);
 			System.out.println(event);
 		}
-		BinlogParseRecord.writeHeader(header, sign);
+		BinlogParseRecord.single.writeHeader(header, sign);
 
 	}
 

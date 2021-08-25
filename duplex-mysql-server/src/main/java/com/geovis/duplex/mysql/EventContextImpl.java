@@ -14,7 +14,7 @@ public class EventContextImpl implements EventContext {
 	
 	public EventContextImpl(Pusher pusher) {
 		this.pusher = pusher;
-		TableMapEvent event = BinlogParseRecord.readTableMapEvent();
+		TableMapEvent event = BinlogParseRecord.single.readTableMapEvent();
 		if (event != null) {
 			event.setFieldMetas(Utils.getMetadata(event));
 			this.event = event;

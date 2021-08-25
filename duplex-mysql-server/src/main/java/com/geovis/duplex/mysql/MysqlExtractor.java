@@ -1,13 +1,14 @@
 package com.geovis.duplex.mysql;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.geovis.duplex.jms.JmsPusher;
+import com.geovis.duplex.jms.Pusher;
 import com.google.code.or.binlog.BinlogParseRecord;
 import com.google.code.or.binlog.BinlogParser;
 import com.google.code.or.binlog.BinlogParserListener;
@@ -60,7 +61,25 @@ public class MysqlExtractor {
 	protected BinlogParser binlogParser;
 	protected final AtomicBoolean running = new AtomicBoolean(false);
 	
-	private JmsPusher push = new JmsPusher();
+	private Pusher push = new Pusher() {
+
+		@Override
+		public void push(Serializable o) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void close() {
+
+		}
+
+		@Override
+		public void build() {
+			// TODO Auto-generated method stub
+
+		}
+	};
 	
 	public void start() {
 		try {
@@ -97,14 +116,14 @@ public class MysqlExtractor {
 	
 	private void recoverPosition() {
 		try {
-			byte flag = BinlogParseRecord.positionReadByte(0);
+			byte flag = BinlogParseRecord.single.positionReadByte(0);
 			if (flag != -1) {
 				return;
 			}
-			binlogPosition = BinlogParseRecord.positionReadLong(11);
-			int fileNameLength = BinlogParseRecord.positionReadInt(19);
+			binlogPosition = BinlogParseRecord.single.positionReadLong(11);
+			int fileNameLength = BinlogParseRecord.single.positionReadInt(19);
 			byte[] bs = new byte[fileNameLength];
-			BinlogParseRecord.positionRead(bs, 23);
+			BinlogParseRecord.single.positionRead(bs, 23);
 			binlogFileName = new String(bs, this.encoding);
 			LOGGER.info("binglog file:" + binlogFileName);
 			LOGGER.info("binglog position:" + binlogPosition);

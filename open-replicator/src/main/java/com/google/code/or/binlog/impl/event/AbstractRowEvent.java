@@ -39,7 +39,7 @@ public abstract class AbstractRowEvent extends AbstractBinlogEventV4 {
 	public void callback(EventContext context) {
 		TableMapEvent mapEvent = (TableMapEvent)context.get();
 		if (mapEvent == null) {
-			mapEvent = BinlogParseRecord.readTableMapEvent();
+			mapEvent = BinlogParseRecord.single.readTableMapEvent();
 			context.set(mapEvent);
 		}
 		this.databaseName = mapEvent.getDatabaseName().toString();

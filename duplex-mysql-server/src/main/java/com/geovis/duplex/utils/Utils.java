@@ -1,7 +1,5 @@
 package com.geovis.duplex.utils;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -24,14 +22,10 @@ public class Utils {
 	static {
 		InputStream in = null;
 		try {
-			File f = new File(System.getProperty("user.dir") + "/conf/master.properties");
-			in = new FileInputStream(f);
+			in = Utils.class.getResourceAsStream("/master.properties");
 			prop.load(in);
 			in.close();
-			Class.forName(prop.getProperty("mysql.driver"));
 		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}

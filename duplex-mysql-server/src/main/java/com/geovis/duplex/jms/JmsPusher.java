@@ -16,23 +16,24 @@ import com.geovis.duplex.jms.broker.EmbededBroker;
 import com.geovis.duplex.utils.Utils;
 
 public class JmsPusher implements Pusher {
-	private static final ActiveMQConnectionFactory localFactory = 
+	private final ActiveMQConnectionFactory localFactory =
 			new ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_USER,
 					ActiveMQConnection.DEFAULT_PASSWORD, 
 					"vm://Broker");
-	static {
+	private Connection connection;
+	private Session session;
+	private MessageProducer producer;
+
+	public JmsPusher() {
+
+	}
+
+	public void build() {
 		EmbededBroker broker = new EmbededBroker();
 		broker.start();
 		localFactory.setUseAsyncSend(true);
 		localFactory.setCopyMessageOnSend(false);
 		localFactory.setAlwaysSessionAsync(false);
-	}
-	
-	private Connection connection;
-	private Session session;
-	private MessageProducer producer;
-	
-	{
 		try {
 			connection = localFactory.createConnection();
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -47,9 +48,6 @@ public class JmsPusher implements Pusher {
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public JmsPusher() {
 	}
 
 	@Override
